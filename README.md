@@ -121,6 +121,9 @@ Stores payment details for completed orders.
 
 ## Data Flow & Database Changes
 
+### User
+- After registered and user logged in we need to provide token for Authorization for some API's
+  
 ### Shopping Cart:
 - When a user adds a product, it gets stored in the `ShoppingCart` table.
 - The `ShoppingCart` table is unique per user, allowing them to store items while they browse.
@@ -132,6 +135,7 @@ Stores payment details for completed orders.
 
 ### Payments:
 - Once an order is successfully processed and payment is completed, the `Payments` table is updated with payment details.
+- After payment get successful the Status in the Orders table and in Payments table changed to Success.
 
 ## API Documentation
 
