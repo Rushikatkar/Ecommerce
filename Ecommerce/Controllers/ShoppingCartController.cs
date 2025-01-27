@@ -1,5 +1,6 @@
 ﻿using BAL.Services.ShoppingCartService;
 using DAL.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace ECommerce.Controllers
         }
 
         [HttpPost("AddToCart")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> AddToCart(int userId, int productId, int quantity)
         {
             try
@@ -34,6 +36,7 @@ namespace ECommerce.Controllers
 
        
         [HttpGet("GetCartItems/{userId}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> GetCartItems(int userId)
         {
             try
@@ -49,6 +52,7 @@ namespace ECommerce.Controllers
 
        
         [HttpDelete("RemoveFromCart/{cartItemId}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> RemoveFromCart(int cartItemId)
         {
             try
@@ -64,6 +68,7 @@ namespace ECommerce.Controllers
 
        
         [HttpPut("UpdateCartItemQuantity")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> UpdateCartItemQuantity(int cartItemId, int newQuantity)
         {
             try

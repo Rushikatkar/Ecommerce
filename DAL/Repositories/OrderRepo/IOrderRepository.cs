@@ -13,5 +13,6 @@ namespace DAL.Repositories.OrderRepo
         Task<List<Order>> GetUserOrdersAsync(int userId);
         Task<Order> GetOrderByIdAsync(int orderId);
         Task UpdateOrderStatusAsync(int orderId, string status);
+
     }
 }

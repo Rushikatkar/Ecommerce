@@ -1,12 +1,15 @@
 ﻿using BAL.Services.OrderService;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ECommerce.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -26,9 +29,14 @@ namespace ECommerce.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Error = ex.Message });
+                // Log the error to get more details
+                Console.Error.WriteLine($"Error: {ex.Message}");
+                Console.Error.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+
+                return BadRequest(new { Error = ex.Message, InnerError = ex.InnerException?.Message });
             }
         }
+
 
         [HttpGet("GetUserOrders/{userId}")]
         public async Task<IActionResult> GetUserOrders(int userId)
@@ -36,7 +44,18 @@ namespace ECommerce.Controllers
             try
             {
                 var orders = await _orderService.GetUserOrdersAsync(userId);
-                return Ok(orders);
+
+                // Define custom serialization options
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    MaxDepth = 32
+                };
+
+                // Serialize the response with custom options
+                string json = JsonSerializer.Serialize(orders, options);
+
+                return Content(json, "application/json");
             }
             catch (Exception ex)
             {

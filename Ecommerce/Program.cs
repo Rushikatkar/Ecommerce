@@ -1,9 +1,11 @@
 using BAL.Services.OrderService;
+using BAL.Services.PaymentService;
 using BAL.Services.ProductService;
 using BAL.Services.ShoppingCartService;
 using BAL.Services.UserService;
 using DAL.Models;
 using DAL.Repositories.OrderRepo;
+using DAL.Repositories.PaymentRepo;
 using DAL.Repositories.ProductRepo;
 using DAL.Repositories.ShoppingCartRepo;
 using DAL.Repositories.UserRepo;
@@ -36,6 +38,9 @@ builder.Services.AddScoped<IShoppingService, ShoppingService>();
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>

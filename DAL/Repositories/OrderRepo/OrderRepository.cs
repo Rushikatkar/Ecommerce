@@ -1,11 +1,9 @@
-﻿using DAL.Models.Entities;
-using DAL.Models;
-using System;
+﻿using DAL.Models;
+using DAL.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories.OrderRepo
 {
@@ -20,23 +18,54 @@ namespace DAL.Repositories.OrderRepo
 
         public async Task<Order> CreateOrderAsync(Order order, List<OrderDetail> orderDetails)
         {
-            await _context.Orders.AddAsync(order);
-            await _context.OrderDetails.AddRangeAsync(orderDetails);
-
-            // Decrease stock in the Products table
-            foreach (var detail in orderDetails)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                var product = await _context.Products.FindAsync(detail.ProductId);
-                if (product != null) product.Stock -= detail.Quantity;
+                try
+                {
+                    // First, insert the order to generate the OrderId
+                    await _context.Orders.AddAsync(order);
+                    await _context.SaveChangesAsync();  // This commits the order and generates the OrderId
+
+                    // Now, set the OrderId in the orderDetails
+                    foreach (var detail in orderDetails)
+                    {
+                        detail.OrderId = order.OrderId;  // Set the OrderId for each order detail
+                    }
+
+                    // Add the order details
+                    await _context.OrderDetails.AddRangeAsync(orderDetails);
+
+                    // Decrease stock in the Products table
+                    foreach (var detail in orderDetails)
+                    {
+                        var product = await _context.Products.FindAsync(detail.ProductId);
+                        if (product != null && product.Stock >= detail.Quantity)
+                        {
+                            product.Stock -= detail.Quantity;
+                        }
+                        else
+                        {
+                            throw new Exception($"Insufficient stock for product: {detail.ProductId}");
+                        }
+                    }
+
+                    // Save all changes and commit the transaction
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return order;
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception details
+                    Console.Error.WriteLine($"Exception: {ex.Message}");
+                    Console.Error.WriteLine($"InnerException: {ex.InnerException?.Message}");
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
-
-            // Clear user's shopping cart
-            var cartItems = _context.ShoppingCarts.Where(c => c.UserId == order.UserId);
-            _context.ShoppingCarts.RemoveRange(cartItems);
-
-            await _context.SaveChangesAsync();
-            return order;
         }
+
 
         public async Task<List<Order>> GetUserOrdersAsync(int userId)
         {
@@ -64,5 +93,11 @@ namespace DAL.Repositories.OrderRepo
                 await _context.SaveChangesAsync();
             }
         }
+
+
+
+
+
+
     }
 }
