@@ -1,12 +1,14 @@
 using BAL.Services.OrderService;
 using BAL.Services.PaymentService;
 using BAL.Services.ProductService;
+using BAL.Services.ReportService;
 using BAL.Services.ShoppingCartService;
 using BAL.Services.UserService;
 using DAL.Models;
 using DAL.Repositories.OrderRepo;
 using DAL.Repositories.PaymentRepo;
 using DAL.Repositories.ProductRepo;
+using DAL.Repositories.ReportRepo;
 using DAL.Repositories.ShoppingCartRepo;
 using DAL.Repositories.UserRepo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,6 +43,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IReportService, ReportService>();    
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
